@@ -7,7 +7,7 @@ set -e
 default_opts="--properties-file /spark-defaults.conf"
 
 
-# Check if CLI args list containes bind address key.
+# Check if CLI args list contains bind address key.
 cli_bind_address() {
   echo "$*" | grep -qE -- "--host\b|-h\b|--ip\b|-i\b"
 }
