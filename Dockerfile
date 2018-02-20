@@ -1,29 +1,15 @@
 FROM openjdk:8-jre-alpine
-MAINTAINER Denis Baryshev <dennybaa@gmail.com>
 
-ENV GOSU_VERSION 1.9
-ENV SPARK_VERSION 1.6.3
+ENV GOSU_VERSION 1.10
+ENV SPARK_VERSION 2.2.1
 ENV SPARK_HOME /usr/local/spark
-ENV SPARK_USER aml
-ENV GLIBC_APKVER 2.24-r0
+ENV SPARK_USER sparkuser
 ENV LANG=en_US.UTF-8
-
-LABEL vendor=ActionML \
-      version_tags="[\"1.6\",\"1.6.3\"]"
 
 # Update alpine and install required tools
 RUN echo "@community http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \ 
     apk add --update --no-cache bash curl gnupg shadow@community
 
-# Glibc compatibility
-RUN curl -sSL https://github.com/stackfeed/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/stackfeed.rsa.pub \
-            -o /etc/apk/keys/stackfeed.rsa.pub && \
-    curl -sSLO https://github.com/stackfeed/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-i18n-$GLIBC_APKVER.apk && \
-    curl -sSLO https://github.com/stackfeed/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-$GLIBC_APKVER.apk && \
-    curl -sSLO https://github.com/stackfeed/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-bin-$GLIBC_APKVER.apk && \
-    apk add --no-cache glibc-$GLIBC_APKVER.apk glibc-bin-$GLIBC_APKVER.apk glibc-i18n-$GLIBC_APKVER.apk && \
-    echo "export LANG=$LANG" > /etc/profile.d/locale.sh && \
-      rm /etc/apk/keys/stackfeed.rsa.pub glibc-*.apk
 
 # Get gosu
 RUN curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 \
@@ -35,9 +21,9 @@ RUN curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gos
     && rm -r /tmp/* && apk del gnupg
 
 # Fetch and unpack spark dist
-RUN curl -L http://www.us.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.6.tgz \
+RUN curl -L http://www.us.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz \
       | tar -xzp -C /usr/local/ && \
-        ln -s spark-${SPARK_VERSION}-bin-hadoop2.6 ${SPARK_HOME}
+        ln -s spark-${SPARK_VERSION}-bin-hadoop2.7 ${SPARK_HOME}
 
 # Create users (to go "non-root") and set directory permissions
 RUN useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
